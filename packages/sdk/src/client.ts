@@ -69,18 +69,20 @@ import {
 import {
     AES_GCM_DERIVED_ALGORITHM,
     CryptoStore,
-    DecryptionEvents,
-    EntitlementsDelegate,
     GroupEncryptionAlgorithmId,
     GroupEncryptionCrypto,
     GroupEncryptionSession,
     IGroupEncryptionClient,
     UserDevice,
     UserDeviceCollection,
-    makeSessionKeys,
-    type BaseDecryptionExtensions,
     type EncryptionDeviceInitOpts,
 } from '@towns-protocol/encryption'
+import {
+    DecryptionEvents,
+    EntitlementsDelegate,
+    makeSessionKeys,
+    type BaseDecryptionExtensions,
+} from './decryptionExtensions'
 import { getMaxTimeoutMs, StreamRpcClient, getMiniblocks } from './makeStreamRpcClient'
 import { errorContains, errorContainsMessage, getRpcErrorProperty } from './rpcInterceptors'
 import { assert, isDefined } from './check'
@@ -389,8 +391,8 @@ export class Client
         const streamIds = Object.entries(stream.view.userContent.streamMemberships).reduce(
             (acc, [streamId, payload]) => {
                 if (
-                    payload.op === MembershipOp.SO_JOIN ||
-                    (payload.op === MembershipOp.SO_INVITE &&
+                    payload?.op === MembershipOp.SO_JOIN ||
+                    (payload?.op === MembershipOp.SO_INVITE &&
                         (isDMChannelStreamId(streamId) || isGDMChannelStreamId(streamId)))
                 ) {
                     acc.push(streamId)
@@ -1253,9 +1255,9 @@ export class Client
     }
 
     async getPersistedEvent(streamId: string, eventId: string): Promise<ParsedEvent | undefined> {
-        const timelineEvent = this.streamsView.timelinesView
-            .getState()
-            .timelines[streamId]?.find((e) => e.eventId === eventId)
+        const timelineEvent = this.streamsView.timelinesView.value.timelines[streamId]?.find(
+            (e) => e.eventId === eventId,
+        )
         if (!timelineEvent) {
             return undefined
         }
@@ -1275,9 +1277,9 @@ export class Client
     }
 
     async pin(streamId: string, eventId: string) {
-        const timelineEvent = this.streamsView.timelinesView
-            .getState()
-            .timelines[streamId]?.find((e) => e.eventId === eventId)
+        const timelineEvent = this.streamsView.timelinesView.value.timelines[streamId]?.find(
+            (e) => e.eventId === eventId,
+        )
         check(isDefined(timelineEvent), 'event not found')
         const blockNumber = timelineEvent.confirmedInBlockNum
         let event: ParsedEvent | undefined
@@ -2063,8 +2065,9 @@ export class Client
         check(isDefined(this.userStreamId))
 
         if (isSpaceStreamId(streamId)) {
-            const channelIds =
-                this.stream(streamId)?.view.spaceContent.spaceChannelsMetadata.keys() ?? []
+            const channelIds = Object.keys(
+                this.stream(streamId)?.view.spaceContent.spaceChannelsMetadata ?? {},
+            )
 
             const userStream = this.stream(this.userStreamId)
             for (const channelId of channelIds) {
@@ -2092,8 +2095,9 @@ export class Client
         this.logCall('removeUser', streamId, userId)
 
         if (isSpaceStreamId(streamId)) {
-            const channelIds =
-                this.stream(streamId)?.view.spaceContent.spaceChannelsMetadata.keys() ?? []
+            const channelIds = Object.keys(
+                this.stream(streamId)?.view.spaceContent.spaceChannelsMetadata ?? {},
+            )
             const userStreamId = makeUserStreamId(userId)
             const userStream = await this.getStream(userStreamId)
 

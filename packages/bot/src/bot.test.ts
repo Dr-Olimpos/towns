@@ -16,7 +16,7 @@ import {
 } from '@towns-protocol/sdk'
 import { describe, it, expect, beforeAll } from 'vitest'
 import type { Bot, BotPayload, UserData } from './bot'
-import { Bot as SyncAgentTest, AppRegistryService } from '@towns-protocol/sdk'
+import { Bot as SyncAgentTest, AppRegistryService, getAppRegistryUrl } from '@towns-protocol/sdk'
 import { bin_fromHexString, bin_toBase64 } from '@towns-protocol/dlog'
 import { makeTownsBot } from './bot'
 import { ethers } from 'ethers'
@@ -34,17 +34,6 @@ import { createServer } from 'node:http2'
 import { serve } from '@hono/node-server'
 
 const WEBHOOK_URL = `https://localhost:${process.env.BOT_PORT}/webhook`
-
-const getAppRegistryUrl = () => {
-    const env = 'local_multi' // TODO: change to process.env.RIVER_ENV
-
-    if (env === 'local_multi') {
-        return process.env.APP_REGISTRY_LOCAL_MULTI_URL!
-    } else if (env === 'local_multi_ne') {
-        return process.env.APP_REGISTRY_LOCAL_MULTI_NE_URL!
-    }
-    throw new Error(`Unknown river env: ${env}`)
-}
 
 type OnMessageType = BotPayload<'message'>
 type OnChannelJoin = BotPayload<'channelJoin'>
@@ -189,7 +178,7 @@ describe('Bot', { sequential: true }, () => {
         const { appRegistryRpcClient: rpcClient } = await AppRegistryService.authenticateWithSigner(
             bob.userId,
             bob.signer,
-            getAppRegistryUrl(),
+            getAppRegistryUrl(process.env.RIVER_ENV!),
         )
         appRegistryRpcClient = rpcClient
         const { hs256SharedSecret } = await appRegistryRpcClient.register({

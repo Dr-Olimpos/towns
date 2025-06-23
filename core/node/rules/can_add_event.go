@@ -1669,6 +1669,7 @@ func (ru *aeUserMembershipRules) parentEventForUserMembership() (*DerivedEvent, 
 			userAddress.Bytes(),
 			initiatorAddress,
 			userMembership.StreamParentId,
+			userMembership.Reason,
 		),
 		StreamId: toStreamId,
 	}, nil
@@ -1907,7 +1908,7 @@ func (ru *aeMembershipRules) getPermissionForMembershipOp() (auth.Permission, co
 				initiatorId,
 			)
 		}
-		if userAddress != initiatorId {
+		if userAddress != initiatorId && !ru.params.isValidNode(initiatorId[:]) {
 			return auth.PermissionModifyBanning, initiatorId, nil
 		} else {
 			return auth.PermissionUndefined, userAddress, nil

@@ -253,14 +253,8 @@ func (sc *SpaceContractV3) GetMembershipStatus(
 	for _, tokenId := range tokens {
 		expiresAt, err := membership.ExpiresAt(&bind.CallOpts{Context: ctx}, tokenId)
 		if err != nil {
-			log.Warnw(
-				"Failed to get expiration for token",
-				"tokenId",
-				tokenId,
-				"error",
-				AsRiverError(sc.decodeError(err)).Tag("method", "ExpiresAt"),
-			)
-			continue
+			log.Warnw("Failed to get expiration for token", "tokenId", tokenId, "error", err)
+			return nil, err
 		}
 
 		// Token never expires
@@ -343,7 +337,7 @@ func (sc *SpaceContractV3) marshalEntitlements(
 func (sc *SpaceContractV3) IsBanned(
 	ctx context.Context,
 	spaceId shared.StreamId,
-	linkedWallets []common.Address,
+	tokenIds []*big.Int,
 ) (bool, error) {
 	log := logging.FromCtx(ctx).With("function", "SpaceContractV3.IsBanned")
 	space, err := sc.getSpace(ctx, spaceId)
@@ -351,11 +345,7 @@ func (sc *SpaceContractV3) IsBanned(
 		log.Warnw("Failed to get space", "space_id", spaceId, "error", err)
 		return false, err
 	}
-	isBanned, err := space.banning.IsBanned(ctx, linkedWallets)
-	if err != nil {
-		return false, AsRiverError(sc.decodeError(err)).Tag("method", "IsBanned")
-	}
-	return isBanned, nil
+	return space.banning.IsBanned(ctx, tokenIds)
 }
 
 /**

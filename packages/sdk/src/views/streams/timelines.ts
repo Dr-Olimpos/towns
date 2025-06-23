@@ -9,7 +9,7 @@ import {
 import { StreamChange } from '../../streamEvents'
 import { toDecryptedContentErrorEvent, toDecryptedEvent, toEvent } from './timelineEvents'
 import { DecryptedContent } from '../../encryptedContentTypes'
-import { DecryptionSessionError } from '@towns-protocol/encryption'
+import { DecryptionSessionError } from '../../decryptionExtensions'
 import isEqual from 'lodash/isEqual'
 import { isDMChannelStreamId } from '../../id'
 
@@ -44,11 +44,6 @@ export class TimelinesView extends Observable<TimelinesViewModel> {
                 this.setValue(fn(this.value))
             },
         )
-    }
-
-    // for backwards compatibility
-    getState() {
-        return this.value
     }
 
     streamInitialized(streamId: string, messages: StreamTimelineEvent[]) {
@@ -95,9 +90,7 @@ export class TimelinesView extends Observable<TimelinesViewModel> {
         eventId: string,
         decryptedContent: DecryptedContent,
     ): TimelineEvent | undefined {
-        const prevEvent = this.getState().timelines[streamId].find(
-            (event) => event.eventId === eventId,
-        )
+        const prevEvent = this.value.timelines[streamId].find((event) => event.eventId === eventId)
         if (prevEvent) {
             const newEvent = toDecryptedEvent(prevEvent, decryptedContent, this.userId)
             if (!isEqual(newEvent, prevEvent)) {
@@ -113,9 +106,7 @@ export class TimelinesView extends Observable<TimelinesViewModel> {
         eventId: string,
         error: DecryptionSessionError,
     ) {
-        const prevEvent = this.getState().timelines[streamId].find(
-            (event) => event.eventId === eventId,
-        )
+        const prevEvent = this.value.timelines[streamId].find((event) => event.eventId === eventId)
         if (prevEvent) {
             const newEvent = toDecryptedContentErrorEvent(prevEvent, error)
             if (newEvent !== prevEvent) {

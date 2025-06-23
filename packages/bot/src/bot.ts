@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-// TODO: proper logging
 // Crypto Store uses IndexedDB, so we need to import fake-indexeddb/auto
 import 'fake-indexeddb/auto'
 import { create, fromBinary, fromJsonString, toBinary } from '@bufbuild/protobuf'
@@ -261,7 +259,6 @@ export class Bot extends (EventEmitter as new () => TypedEmitter<BotEvents>) {
                     audience: expectedAudience,
                 })
             } catch (err) {
-                console.error('Webhook: JWT verification failed', err)
                 let errorMessage = 'Unauthorized: Token verification failed'
                 if (err instanceof jwt.TokenExpiredError) {
                     errorMessage = 'Unauthorized: Token expired'
@@ -421,7 +418,6 @@ export class Bot extends (EventEmitter as new () => TypedEmitter<BotEvents>) {
                 (sessionId) => sessionId !== '',
             )
             const { eventId } = await this.client.sendKeySolicitation(streamId, missingSessionIds)
-            console.log('sent key solicitation for sessions:', missingSessionIds, eventId)
         } else {
             logNever(appEvent.payload)
         }
@@ -972,12 +968,10 @@ const buildBotActions = (client: ClientV2, viemClient: ViemClient) => {
             const stream = await client.getStream(streamId)
             const members = stream.snapshot.members?.joined
             if (!members) {
-                console.warn(`No members found in stream snapshot for streamId: ${streamId}`)
                 return null
             }
             const member = members.find((m) => userIdFromAddress(m.userAddress) === userId)
             if (!member) {
-                console.warn(`Member with userId ${userId} not found in stream ${streamId}`)
                 return null
             }
             let displayName: string | null = null
@@ -1002,11 +996,12 @@ const buildBotActions = (client: ClientV2, viemClient: ViemClient) => {
                         ? displayNameDecrypted
                         : bin_toString(displayNameDecrypted)
             }
-            let ensAddress = undefined
+            let ensAddress: string | undefined = undefined
             if (member.ensAddress) {
                 ensAddress = `0x${bin_toHexString(member.ensAddress)}`
             }
-            let nft = undefined
+            let nft: { tokenId: string; contractAddress: string; chainId: number } | undefined =
+                undefined
             if (member.nft) {
                 nft = {
                     tokenId: bin_toString(member.nft.tokenId),
@@ -1028,8 +1023,7 @@ const buildBotActions = (client: ClientV2, viemClient: ViemClient) => {
                 bio,
                 profilePictureUrl,
             }
-        } catch (error) {
-            console.error(`Error fetching member data for ${userId} in stream ${streamId}:`, error)
+        } catch {
             return null
         }
     }

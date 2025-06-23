@@ -107,25 +107,6 @@ export default [
   },
   {
     "type": "function",
-    "name": "isAppInstalled",
-    "inputs": [
-      {
-        "name": "app",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool",
-        "internalType": "bool"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "onInstallApp",
     "inputs": [
       {

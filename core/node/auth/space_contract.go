@@ -64,7 +64,7 @@ type SpaceContract interface {
 	IsBanned(
 		ctx context.Context,
 		spaceId shared.StreamId,
-		linkedWallets []common.Address,
+		tokenIds []*big.Int,
 	) (bool, error)
 	GetRoles(
 		ctx context.Context,
