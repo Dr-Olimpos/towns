@@ -46,21 +46,6 @@ export const ethereumAddressAsString = (address: string | Uint8Array): string =>
 export const ethereumAddressAsBytes = (address: string | Uint8Array): Uint8Array =>
     typeof address === 'string' ? ethereumAddressToBytes(address) : address
 
-export function stripUndefinedMetadata(
-    obj: Record<string, Uint8Array | undefined>,
-): { [key: string]: Uint8Array } | undefined {
-    const result: Record<string, Uint8Array> = {}
-
-    for (const key in obj) {
-        const val = obj[key]
-        if (val !== undefined) {
-            result[key] = val
-        }
-    }
-
-    return Object.keys(result).length > 0 ? result : undefined
-}
-
 export function promiseTry<T>(fn: () => T | Promise<T>): Promise<T> {
     return Promise.resolve(fn())
 }

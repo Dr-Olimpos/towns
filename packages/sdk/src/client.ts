@@ -611,11 +611,10 @@ export class Client
                 }),
             ),
         ]
-        const encoded = metadata ? stripUndefinedMetadata(metadata) : metadata
         const response = await this.rpcClient.createStream({
             events: userEvents,
             streamId: streamIdAsBytes(userStreamId),
-            metadata: encoded,
+            metadata,
         })
         return unpackStream(response.stream, this.opts?.unpackEnvelopeOpts)
     }
@@ -634,11 +633,10 @@ export class Client
                 }),
             ),
         ]
-        const encoded = metadata ? stripUndefinedMetadata(metadata) : metadata
         const response = await this.rpcClient.createStream({
             events: userDeviceKeyEvents,
             streamId: streamIdAsBytes(userMetadataStreamId),
-            metadata: encoded,
+            metadata,
         })
         return unpackStream(response.stream, this.opts?.unpackEnvelopeOpts)
     }
@@ -657,11 +655,10 @@ export class Client
                 }),
             ),
         ]
-        const encoded = metadata ? stripUndefinedMetadata(metadata) : metadata
         const response = await this.rpcClient.createStream({
             events: userInboxEvents,
             streamId: streamIdAsBytes(userInboxStreamId),
-            metadata: encoded,
+            metadata,
         })
         return unpackStream(response.stream, this.opts?.unpackEnvelopeOpts)
     }
@@ -682,11 +679,10 @@ export class Client
             ),
         ]
 
-        const encoded = metadata ? stripUndefinedMetadata(metadata) : metadata
         const response = await this.rpcClient.createStream({
             events: userSettingsEvents,
             streamId: userSettingsStreamId,
-            metadata: encoded,
+            metadata,
         })
         return unpackStream(response.stream, this.opts?.unpackEnvelopeOpts)
     }
